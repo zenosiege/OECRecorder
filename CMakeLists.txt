@@ -12,11 +12,23 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
+# добавили из прошлого проекта библиотеки, чтобы программа не упала при
+# попытке вызывать функции из ROS2 и OpenCV
+find_package(OpenCV REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
+)
+
+# пути к заголовочным файлам OpenCV
+include_directories(
+    ${OpenCV_INCLUDE_DIRS}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -43,7 +55,13 @@ else()
     endif()
 endif()
 
-target_link_libraries(OECRecorder PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+# и сами библиотеки
+target_link_libraries(OECRecorder PRIVATE
+    Qt${QT_VERSION_MAJOR}::Widgets
+    ${OpenCV_LIBS}
+    rclcpp::rclcpp
+    cv_bridge::cv_bridge
+)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
